@@ -1,0 +1,32 @@
+- name: Монтирование tmpfs
+  mount: 
+    src: tmpfs
+    path: /database/pg_stat_tmp
+    opts: noatime,nodiratime,defaults,size=128M
+    boot: yes
+    state: mounted
+    fstype: tmpfs
+
+- name: Создание каталога pg_stat_tmp
+  file:
+    path: /database/pg_stat_tmp
+    state: directory
+    mode: '0755'
+    owner: postgres
+    group: postgres
+
+- name: Удалить старый каталог pg_stat_tmp
+  file:
+    path: /database/clusterstorage/data/pg_stat_tmp
+    state: absent
+
+- name: Создание симлинка для pg_stat_tmp
+  file:
+    src: /database/pg_stat_tmp
+    dest: /database/clusterstorage/data/pg_stat/tmp
+    state: link
+    owner: postgres
+    group: postgres
+
+- name: Включение сервиса и добавление в автозагрузку
+  service: name="postgresql-15" state=restarted

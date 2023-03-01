@@ -1,0 +1,49 @@
+---
+
+- hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+
+    - name: Выключение сервиса
+      service: name="postgresql-15" state=stopped
+
+    - name: Отмантирование pg_stat_tmp
+      mount:
+        src: tmpfs
+        path: /database/pg_stat_tmp
+        state: unmounted
+        fstype: tmpfs
+
+#    - name: Отмантирование pg_stat_tmp
+#      shell: "umount /database/pg_stat_tmp"
+
+    - name: Очищение fstab
+      shell: "echo '#' > /etc/fstab"
+
+    - name: удаление пакетов postgres
+      shell: "yum remove -y postgresql*"
+
+    - name: удаление каталога /var/lib/pgsql
+      file:
+        path: /var/lib/pgsql
+        state: absent
+
+    - name: удаление каталога /database
+      file:
+        path: /database
+        state: absent
+
+    - name: удаление бинарников
+      file:
+        path: /usr/pgsql-15
+        state: absent
+
+    - name: удаление бинарников
+      file:
+        path: /usr/pgsql-14
+        state: absent
+
+
+
+

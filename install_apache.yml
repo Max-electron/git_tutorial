@@ -1,0 +1,14 @@
+---
+- hosts: OEL
+  become: yes
+  tasks:
+    - name: install apache2
+      yum: name=https update_cache=yes state=latest
+
+    - name: rewrite
+      https_module: name=rewrite state=present
+      notify:
+        - restart https
+  handlers:
+    - name: restart https
+      service: name=https state=restarted

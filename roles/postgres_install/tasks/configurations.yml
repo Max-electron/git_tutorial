@@ -1,0 +1,59 @@
+- name: Установка параметров
+  community.postgresql.postgresql_set:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+#  loop:
+#    - { name: 'listen_addresses', value: '*' }
+#    - { name: 'shared_buffers', value: '256MB' }
+#    - { name: 'maintenance_work_mem', value: '128MB' }
+#    - { name: 'effective_cache_size', value: '512MB' }
+#    - { name: 'log_filename', value: 'postgresql-%a.log' }
+#    - { name: 'work_mem', value: '20MB' }
+#    - { name: 'min_wal_size', value: '500MB' }
+#    - { name: 'max_wal_size', value: '2GB' }
+#    - { name: 'max_parallel_workers', value: '2' }
+#    - { name: 'max_worker_processes', value: '2' }
+#    - { name: 'log_line_prefix', value: '%t [%p]: user=%u,db=%d,app=%a,client=%h ' }
+#    - { name: 'log_min_duration_statement', value: '50000' }
+#    - { name: 'checkpoint_timeout', value: '15min' }
+#    - { name: 'wal_recycle', value: 'off' }
+#    - { name: 'wal_init_zero', value: 'off' }
+
+  loop:
+    - { name: 'listen_addresses', value: '*' }
+    - { name: 'shared_buffers', value: '256MB'}
+    - { name: 'maintenance_work_mem', value: '128MB'}
+    - { name: 'effective_cache_size', value: '512MB'}
+    - { name: 'work_mem', value: '20MB'}
+    - { name: 'max_parallel_workers', value: '2'}
+    - { name: 'max_worker_processes', value: '2'}
+    - { name: 'max_parallel_workers_per_gather', value: '2'}
+    - { name: 'max_parallel_maintenance_workers', value: '2'}
+    - { name: 'cpu_tuple_cost', value: '0.03'}
+    - { name: 'random_page_cost', value: '1.1'}
+    - { name: 'effective_io_concurrency', value: '100'}
+    - { name: 'min_wal_size', value: '500MB'}
+    - { name: 'max_wal_size', value: '2GB'}
+    - { name: 'log_line_prefix', value: '%t [%p]: user=%u,db=%d,app=%a,client=%h '}
+    - { name: 'autovacuum_naptime', value: '20s' }
+    - { name: 'autovacuum_vacuum_scale_factor', value: '0.01' }
+    - { name: 'autovacuum_analyze_scale_factor', value: '0.005' }
+    - { name: 'autovacuum_max_workers', value: '2'}
+    - { name: 'checkpoint_timeout', value: '15min' }
+    - { name: 'vacuum_cost_limit', value: '400' }
+    - { name: 'bgwriter_delay', value: '20ms' }
+    - { name: 'bgwriter_lru_multiplier', value: '2.0' }
+    - { name: 'bgwriter_lru_maxpages', value: '200' }
+    - { name: 'wal_recycle', value: 'off' }
+    - { name: 'wal_init_zero', value: 'off' }
+    - { name: 'maintenance_io_concurrency', value: '10' }
+    - { name: 'idle_in_transaction_session_timeout', value: '7200000' }
+    - { name: 'log_temp_files', value: '-1' }
+    - { name: 'log_min_duration_statement', value: '50000' }
+    - { name: 'deadlock_timeout', value: '4s' }
+#    - { name: 'timezone', value: 'Europe/Moscow' }
+#    - { name: 'max_files_per_process', value: '65536' }
+#    - { name: 'track_activity_query_size', value: '65536' }
+
+- name: Включение сервиса и добавление в автозагрузку
+  service: name="postgresql-15" state=restarted

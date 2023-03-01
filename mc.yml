@@ -1,0 +1,10 @@
+---
+
+- hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+  - name: установка midnight commander
+    yum:
+      name: "mc"
+      state: present

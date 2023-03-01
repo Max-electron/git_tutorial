@@ -1,0 +1,17 @@
+---
+
+- name: Удаление старого pg_hba
+  file:
+    path: /database/clusterstorage/data/pg_hba.conf
+    state: absent
+
+- name: Установка pg_hba.conf
+  template:
+    src: templates/pg_hba.conf.j2
+    dest: /database/clusterstorage/data/pg_hba.conf
+    mode: '600'
+    owner: postgres
+    group: postgres
+
+- name: Включение сервиса и добавление автозапуска
+  service: name="postgresql-15" state=started enabled=yes

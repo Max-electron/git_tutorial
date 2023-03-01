@@ -1,0 +1,34 @@
+- name: установка пакетов postgres
+  yum:
+    name:
+      - "python3-psycopg2"
+      - "postgresql15-server"
+      - "postgresql15-contrib"
+      - "postgresql15-libs"
+    state: present
+
+- name: Инициализация кластера БД
+  shell: "su - postgres -c '/usr/pgsql-15/bin/initdb -D /var/lib/pgsql/15/data -k'"
+
+- name: Создание дтиректории
+  file:
+    path: /database/clusterstorage
+    state: directory
+    mode: '700'
+    owner: postgres
+    group: postgres
+
+- name: Перемещение кластера
+  command: mv /var/lib/pgsql/15/data /database/clusterstorage/
+
+- name: Создание симлинка
+  file:
+    src: /database/clusterstorage/data
+    dest: /var/lib/pgsql/15/data
+    state: link
+    owner: postgres
+    group: postgres
+
+
+
+

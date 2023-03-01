@@ -1,0 +1,94 @@
+---
+
+- hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+  - name: установка пакетов postgres
+    yum:
+      name:
+        - "python3-psycopg2"
+        - "postgresql15-server"
+        - "postgresql15-contrib"
+        - "postgresql15-libs"
+      state: present
+
+  - name: Инициализация кластера БД
+    shell: "su - postgres -c '/usr/pgsql-15/bin/initdb -D /var/lib/pgsql/15/data -k'"
+
+  - name: Создание дтиректории
+    file:
+      path: /database/clusterstorage
+      state: directory
+      mode: '700'
+      owner: postgres
+      group: postgres
+
+  - name: Перемещение кластера
+    command: mv /var/lib/pgsql/15/data /database/clusterstorage/
+
+  - name: Создание симлинка
+    file:
+      src: /database/clusterstorage/data
+      dest: /var/lib/pgsql/15/data
+      state: link
+      owner: postgres
+      group: postgres
+
+  - name: Включение сервиса и добавление в автозагрузку
+    service: name="postgresql-15" state=restarted
+
+  - name: Установка параметров
+    community.postgresql.postgresql_set:
+      name: "{{ item.name }}"
+      value: "{{ item.value }}"
+    loop:
+      - { name: 'listen_addresses', value: '*' }
+      - { name: 'shared_buffers', value: '256MB' }
+      - { name: 'maintenance_work_mem', value: '128MB' }
+
+  - name: Монтирование tmpfs
+    mount: 
+      src: tmpfs
+      path: /database/pg_stat_tmp
+      opts: noatime,nodiratime,defaults,size=128M
+      boot: yes
+      state: mounted
+      fstype: tmpfs
+
+  - name: Создание каталога pg_stat_tmp
+    file:
+      path: /database/pg_stat_tmp
+      state: directory
+      mode: '0755'
+      owner: postgres
+      group: postgres
+
+  - name: Удалить старый каталог pg_stat_tmp
+    file:
+      path: /database/clusterstorage/data/pg_stat_tmp
+      state: absent
+
+  - name: Создание симлинка для pg_stat_tmp
+    file:
+      src: /database/pg_stat_tmp
+      dest: /database/clusterstorage/data/pg_stat/tmp
+      state: link
+      owner: postgres
+      group: postgres
+
+  - name: Создание пользователя Кузнецов
+    postgresql_user:
+      name: kuznetcov_ma
+      password: maxim
+      role_attr_flags: SUPERUSER
+    environment:
+      PGOPTIONS: "-c password_encryption=scram-sha-256"
+
+  - name: Отозвать привелегии для  роли public в схеме public
+    postgresql_privs:
+      db: template1
+      state: absent
+      privs: CREATE
+      objs: ALL_IN_SCHEMA
+      role: PUBLIC

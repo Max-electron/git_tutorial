@@ -1,0 +1,5 @@
+---
+- hosts: OEL
+  tasks:
+    - name: run echo command
+      command: /bin/echo Hello Maxim
